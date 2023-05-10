@@ -2,7 +2,7 @@ import 'zone.js/dist/zone';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { of, from } from 'rxjs';
+import { of, from, tap, map, take } from 'rxjs';
 
 @Component({
   selector: 'my-app',
@@ -17,12 +17,31 @@ import { of, from } from 'rxjs';
 })
 export class App implements OnInit {
   ngOnInit(): void {
-    of(2, 4, 6, 8).subscribe((item) => console.log(item));
-    from([20, 15, 10, 5]).subscribe({
-      next: (item) => console.log(`resulting item .. ${item}`),
-      error: (err) => console.error(`error occured ${err}`),
-      complete: () => console.log('complete'),
-    });
+    //of(2, 4, 6, 8).subscribe((item) => console.log(item));
+    from([20, 15, 10, 5])
+      .pipe(
+        tap((item) => console.log(`emitted item ... ${item}`)),
+        map((item) => item * 2),
+        map((item) => item - 10),
+        map((item) => {
+          if (item === 0) {
+            throw new Error('zero detected');
+          }
+          return item;
+        }),
+        take(3)
+      )
+      .subscribe({
+        next: (item) => console.log(`resulting item .. ${item}`),
+        error: (err) => console.error(`error occured ${err}`),
+        complete: () => console.log('complete'),
+      });
+
+    //    from(['apple mac', 'apple iphone', 'apple ipad', 'apple tv']).subscribe({
+    //     next: (item) => console.log(`resulting item .. ${item}`),
+    //     error: (err) => console.error(`error occured ${err}`),
+    //     complete: () => console.log('complete'),
+    //   });
   }
   name = 'Angular';
 }
